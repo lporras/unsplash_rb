@@ -127,7 +127,7 @@ module Unsplash #:nodoc:
           param_key = verb == :post ? :body : :params
           @oauth_token.public_send(verb,  @api_base_uri + path, param_key => params, headers: headers)
         else
-          self.class.public_send verb, path, query: params, headers: public_auth_header
+          self.class.public_send verb, path, query: params, headers: headers.merge(public_auth_header)
         end
       rescue OAuth2::Error => e
         OpenStruct.new(headers: {}, status: 403, body: e.message)
@@ -167,7 +167,8 @@ module Unsplash #:nodoc:
 
     def error_message(response)
       body = JSON.parse(response.body)
-      body["error"] || body["errors"].join(" ")
+      message = body["error"] || Array(body["errors"]).join(" ")
+      message.empty? ? "HTTP #{response.respond_to?(:status) ? response.status : response.code}" : message
     rescue JSON::ParserError
       raise Unsplash::Error.new(response.body)
     end

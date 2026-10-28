@@ -29,7 +29,7 @@ describe Unsplash::Connection do
     end
 
     it "appends the utm params" do
-      headers = { "Authorization"=> "Client-ID #{Unsplash.configuration.application_access_key}" }
+      headers = { "Accept-Version" => "v1", "Authorization"=> "Client-ID #{Unsplash.configuration.application_access_key}" }
       params = {
         foo: "bar",
         "utm_source" => "my_app",
@@ -108,6 +108,31 @@ describe Unsplash::Connection do
         @oauth_token = connection.create_and_assign_token(@oauth_hash)
         expect(@oauth_token).to be nil
       end
+    end
+  end
+
+  describe "public (Client-ID) requests" do
+    include WebMock::API
+
+    let(:connection) { Unsplash::Connection.new }
+
+    around { |example| VCR.turned_off { example.run } }
+    before { WebMock.reset! }
+    after { WebMock.reset! }
+
+    it "sends the Accept-Version header" do
+      stub = stub_request(:get, %r{\Ahttps://api\.unsplash\.com/photos/abc})
+        .with(headers: { "Accept-Version" => "v1", "Authorization" => "Client-ID #{Unsplash.configuration.application_access_key}" })
+        .to_return(status: 200, body: "{}")
+
+      connection.get("/photos/abc")
+      assert_requested(stub)
+    end
+
+    it "raises Unsplash::Error, not NoMethodError, for an error body without an errors array" do
+      stub_request(:get, %r{\Ahttps://api\.unsplash\.com/photos/abc}).to_return(status: 500, body: "{}")
+
+      expect { connection.get("/photos/abc") }.to raise_error(Unsplash::Error, "HTTP 500")
     end
   end
 end
