@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "httparty", "~> 0.20"
   spec.add_dependency "oauth2",   ">= 2.0.8"
-  spec.add_dependency "faraday-multipart", "~> 1.0.4"
+  spec.add_dependency "faraday-multipart", "~> 1.0"
 
   spec.add_development_dependency "rake",    "~> 12.3.2"
   spec.add_development_dependency "rspec",   "~> 3.8.0"
