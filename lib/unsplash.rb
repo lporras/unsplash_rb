@@ -1,6 +1,7 @@
 require "oauth2"
 require "httparty"
 require "delegate"
+require "ostruct"
 
 require "unsplash/version"
 require "unsplash/configuration"
